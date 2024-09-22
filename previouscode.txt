@@ -1,0 +1,92 @@
+#include <Arduino.h>
+#include <Wire.h>
+
+#define SDA_PIN 21
+#define SCL_PIN 22
+#define MUX_S0_PIN 25
+#define MUX_S1_PIN 26
+#define MUX_S2_PIN 27
+
+uint16_t readDistance_1();
+uint16_t readDistance_2();
+uint16_t readDistance_3();
+
+void setup() {
+  Wire.begin(SDA_PIN, SCL_PIN);
+  Serial.begin(115200);
+
+  // Initialize mux control pins as outputs and set them to LOW
+}
+
+void loop() {
+  uint16_t sum = 0;
+  for (int i = 0; i < 5; i++) {
+    sum += readDistance_1();
+    sum += readDistance_2();
+    sum += readDistance_3();
+    delay(40);
+  }
+
+  Serial.println(sum / 15);
+}
+
+uint16_t readDistance_1() {
+  uint16_t distance = 0;
+
+  // Set mux to read from channel S0 (Y0)
+
+  Wire.beginTransmission(0x70);
+  Wire.write(0x01);
+  Wire.endTransmission();
+  Wire.beginTransmission(0x52);  
+  Wire.write(0x00);              
+  Wire.endTransmission();
+
+  Wire.requestFrom(0x52, 2);
+  if (Wire.available()) {
+    distance = Wire.read();
+    distance = distance << 8;
+    distance |= Wire.read();
+  }
+  return distance;
+}
+uint16_t readDistance_2() {
+  uint16_t distance = 0;
+
+  // Set mux to read from channel S0 (Y0)
+
+  Wire.beginTransmission(0x70);
+  Wire.write(0x02);
+  Wire.endTransmission();
+  Wire.beginTransmission(0x52);  
+  Wire.write(0x00);              
+  Wire.endTransmission();
+
+  Wire.requestFrom(0x52, 2);
+  if (Wire.available()) {
+    distance = Wire.read();
+    distance = distance << 8;
+    distance |= Wire.read();
+  }
+  return distance;
+}
+uint16_t readDistance_3() {
+  uint16_t distance = 0;
+
+  // Set mux to read from channel S0 (Y0)
+
+  Wire.beginTransmission(0x70);
+  Wire.write(0x03);
+  Wire.endTransmission();
+  Wire.beginTransmission(0x52);  
+  Wire.write(0x00);              
+  Wire.endTransmission();
+
+  Wire.requestFrom(0x52, 2);
+  if (Wire.available()) {
+    distance = Wire.read();
+    distance = distance << 8;
+    distance |= Wire.read();
+  }
+  return distance;
+}
