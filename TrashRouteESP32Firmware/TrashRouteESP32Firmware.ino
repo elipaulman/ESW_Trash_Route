@@ -4,6 +4,9 @@
 // TFLuna-I2C Library v0.2.0
 #include <TFLI2C.h>
 
+// 24 hours in microseconds
+const int64_t TIME = 86400000000;
+
 const char* SSID = "Registered4OSU";
 const char* PASS = "dSDfe5jvfGVV7yg5";
 
@@ -13,7 +16,7 @@ void setup() {
   // Initialize
   Serial.begin(115200);
   Wire.begin();
-  Serial.println("Hello, World!");
+  Serial.println("Good morning!");
 
   // Station WiFi and disconnect from any networks we might already be on.
   WiFi.mode(WIFI_STA);
@@ -31,9 +34,13 @@ void setup() {
   Serial.print("done!");
 
   Serial.println("\nConnected successfully! Setup complete!");
+
+  Serial.println("Goodnight!");
+  // Not sure if we need to free/close the sensor here
+  Serial.flush();
+  esp_sleep_enable_timer_wakeup(TIME);
+  esp_deep_sleep_start();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
-}
+// Nothing to loop
+void loop() { }
