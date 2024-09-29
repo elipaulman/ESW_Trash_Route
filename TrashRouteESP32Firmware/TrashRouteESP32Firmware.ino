@@ -12,12 +12,7 @@ const char* PASS = "dSDfe5jvfGVV7yg5";
 
 TFLI2C tflI2C;
 
-void setup() {
-  // Initialize
-  Serial.begin(115200);
-  Wire.begin();
-  Serial.println("Good morning!");
-
+void connectWiFi() {
   // Station WiFi and disconnect from any networks we might already be on.
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
@@ -32,15 +27,23 @@ void setup() {
     delay(100);
   }
   Serial.print("done!");
+}
 
-  Serial.println("\nConnected successfully! Setup complete!");
+void setup() {
+  // Initialize
+  Serial.begin(115200);
+  Wire.begin();
+  Serial.println("Good morning!");
+
+  connectWifi();
+
+  Serial.println("\nTaking reading...");
+
+  // SENSOR AND BATTERY STUFF HERE
 
   Serial.println("Goodnight!");
-  // Not sure if we need to free/close the sensor here
+  // Not sure if we need to free/close the sensor here, I know that deep sleep will straight up disable the wifi chip though so that's all cleaned up fine
   Serial.flush();
   esp_sleep_enable_timer_wakeup(TIME);
   esp_deep_sleep_start();
 }
-
-// Nothing to loop
-void loop() { }
