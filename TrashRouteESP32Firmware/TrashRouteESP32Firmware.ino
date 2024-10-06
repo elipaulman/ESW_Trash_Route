@@ -49,7 +49,7 @@ void setup() {
   Serial.print("\n\nTaking reading...");
 
   if (tflI2C.getData(tfDist, tfFlux, tfTemp, tfAddr)) {
-    Serial.println("OK\n")
+    Serial.println("OK\n");
     Serial.print("Dist: ");
     Serial.println(tfDist);
     Serial.print("Flux: ");
