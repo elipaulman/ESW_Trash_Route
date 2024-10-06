@@ -35,7 +35,7 @@ void setup() {
   Wire.begin();
   Serial.println("Good morning!");
 
-  connectWifi();
+  connectWiFi();
 
   Serial.println("\nTaking reading...");
 
@@ -47,3 +47,5 @@ void setup() {
   esp_sleep_enable_timer_wakeup(TIME);
   esp_deep_sleep_start();
 }
+
+void loop () { }
