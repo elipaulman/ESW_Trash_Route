@@ -6,11 +6,21 @@
 
 // 24 hours in microseconds
 const int64_t TIME = 86400000000;
+// const int64_t TIME = 10000000;
 
 const char* SSID = "Registered4OSU";
 const char* PASS = "dSDfe5jvfGVV7yg5";
 
 TFLI2C tflI2C;
+
+// Distance in centimeters
+int16_t tfDist;
+// Signal quality/strength
+int16_t tfFlux;
+// Chip temperature in hundreths of *C
+int16_t tfTemp;
+
+int16_t tfAddr = TFL_DEF_ADR;
 
 void connectWiFi() {
   // Station WiFi and disconnect from any networks we might already be on.
@@ -30,19 +40,29 @@ void connectWiFi() {
 }
 
 void setup() {
-  // Initialize
   Serial.begin(115200);
   Wire.begin();
-  Serial.println("Good morning!");
+  Serial.println("\n\n\nGood morning!");
 
   connectWiFi();
 
-  Serial.println("\nTaking reading...");
+  Serial.print("\n\nTaking reading...");
 
-  // SENSOR AND BATTERY STUFF HERE
+  if (tflI2C.getData(tfDist, tfFlux, tfTemp, tfAddr)) {
+    Serial.println("OK\n")
+    Serial.print("Dist: ");
+    Serial.println(tfDist);
+    Serial.print("Flux: ");
+    Serial.println(tfFlux);
+    Serial.print("Temp: ");
+    Serial.println(tfTemp);
+  } else {
+    Serial.println("***FAILED***");
+    Serial.println("\ntflI2C STATUS:");
+    tflI2C.printStatus();
+  }
 
-  Serial.println("Goodnight!");
-  // Not sure if we need to free/close the sensor here, I know that deep sleep will straight up disable the wifi chip though so that's all cleaned up fine
+  Serial.println("Goodnight!\n\n\n");
   Serial.flush();
   esp_sleep_enable_timer_wakeup(TIME);
   esp_deep_sleep_start();
