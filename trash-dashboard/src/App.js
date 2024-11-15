@@ -31,7 +31,7 @@ const App = () => {
     // Fetch data from backend
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/trash-data');
+        const response = await axios.get('https://esw-trash-route.onrender.com/api/trash-data');
         console.log('Fetched data:', response.data); // Log the fetched data
         setData(response.data);
       } catch (error) {
