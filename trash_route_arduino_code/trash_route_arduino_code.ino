@@ -4,7 +4,7 @@
 #include <HTTPClient.h>
 #include <TFLI2C.h>
 
-const char* SSID = "YeOldeWifi";
+const char* SSID = "Ye Olde Wifi";
 //"Registered4OSU";
 const char* PASS = "141ENorwichAve!";
 //"dSDfe5jvfGVV7yg5";
