@@ -20,7 +20,7 @@
   },
   "scripts": {
     "install-server": "npm install",
-    "start-server": "node index.js",
+    "start-server": "node server.js",
     "install-client": "npm install",
     "build-client": "npm run build",
     "start-client": "npm run start"
