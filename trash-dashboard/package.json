@@ -18,6 +18,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "install-server": "npm install",
+    "start-server": "node server.js",
+    "install-client": "npm install",
+    "build-client": "npm run build",
+    "start-client": "npm run start",
     "start": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
