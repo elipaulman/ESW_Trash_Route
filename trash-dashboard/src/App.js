@@ -73,14 +73,14 @@ const App = () => {
   const filteredData = data.filter(item => item.name === selectedDumpster?.value);
 
   // Get the last 3 measurements
-  const lastThreeMeasurements = filteredData.slice(-3);
+  const lastFiveMeasurements = filteredData.slice(-5);
 
   // Dumpster dimensions
   const dumpsterHeightFeet = 3.5; // Height of the dumpster in feet
   const dumpsterHeightCm = dumpsterHeightFeet * 30.48; // Convert feet to cm
   const currentDistanceCm =
-    lastThreeMeasurements.length > 0
-      ? lastThreeMeasurements[lastThreeMeasurements.length - 1].distance
+    lastFiveMeasurements.length > 0
+      ? lastFiveMeasurements[lastFiveMeasurements.length - 1].distance
       : dumpsterHeightCm; // Default to full height if no data
 
   // Calculate fullness level
@@ -96,8 +96,8 @@ const App = () => {
 
   // Temperature conversion
   const currentTemperatureRaw =
-    lastThreeMeasurements.length > 0
-      ? lastThreeMeasurements[lastThreeMeasurements.length - 1].temperature
+    lastFiveMeasurements.length > 0
+      ? lastFiveMeasurements[lastFiveMeasurements.length - 1].temperature
       : 'N/A';
   const currentTemperatureCelsius =
     currentTemperatureRaw !== 'N/A' ? currentTemperatureRaw / 10 : 'N/A';
@@ -108,13 +108,13 @@ const App = () => {
 
   // Chart data
   const chartData = {
-    labels: lastThreeMeasurements.map((entry) =>
+    labels: lastFiveMeasurements.map((entry) =>
       new Date(entry.timestamp).toLocaleString()
     ),
     datasets: [
       {
         label: 'Distance (ft)',
-        data: lastThreeMeasurements.map((entry) => entry.distance / 30.48), // Convert cm to ft
+        data: lastFiveMeasurements.map((entry) => entry.distance / 30.48), // Convert cm to ft
         borderColor: '#bb0000', // Ohio State Scarlet
         backgroundColor: 'rgba(187, 0, 0, 0.2)', // Light Scarlet background
         fill: true,
