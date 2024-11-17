@@ -5,10 +5,8 @@
 #include <TFLI2C.h>
 
 // WiFi credentials
-const char* SSID = "Ye Olde Wifi";
-// "Registered4OSU";
-const char* PASS = "141ENorwichAve!";
-// "dSDfe5jvfGVV7yg5";
+const char* SSID = "Registered4OSU";
+const char* PASS = "dSDfe5jvfGVV7yg5";
 
 // REST API Endpoint
 const char* SERVER_NAME = "https://esw-trash-route.onrender.com/api/trash-data";
