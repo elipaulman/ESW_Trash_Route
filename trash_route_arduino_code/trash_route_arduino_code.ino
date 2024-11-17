@@ -5,14 +5,16 @@
 #include <TFLI2C.h>
 
 // WiFi credentials
-const char* SSID = "Registered4OSU";
-const char* PASS = "dSDfe5jvfGVV7yg5";
+const char* SSID = "Ye Olde Wifi";
+//Registered4OSU
+const char* PASS = "141ENorwichAve!";
+//dSDfe5jvfGVV7yg5
 
 // REST API Endpoint
 const char* SERVER_NAME = "https://esw-trash-route.onrender.com/api/trash-data";
 
 // Device Name
-const char* DEVICE_NAME = "TrashSensor01"; // Replace with the desired name
+const char* DEVICE_NAME = "Thompson-01";
 
 // TFLuna Variables
 TFLI2C tflI2C;
@@ -22,7 +24,8 @@ int16_t tfTemp;  // Chip temperature in hundredths of *C
 int16_t tfAddr = TFL_DEF_ADR; // Default TFLuna address
 
 // Sleep duration: 1 hour (in microseconds)
-#define SLEEP_DURATION_US (60ULL * 60 * 1000000)
+// 1 hour: 60ULL * 60 * 1000000
+#define SLEEP_DURATION_US (60ULL * 1000000)
 
 void connectWiFi() {
   WiFi.mode(WIFI_STA);

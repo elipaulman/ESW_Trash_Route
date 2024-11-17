@@ -38,9 +38,8 @@ app.post('/api/trash-data', async (req, res) => {
 });
 
 app.get('/api/trash-data', async (req, res) => {
-  const { name } = req.query;
   try {
-    const data = await TrashData.find({ name });
+    const data = await TrashData.find({});
     res.json(data);
   } catch (error) {
     res.status(500).send('Error retrieving data');
