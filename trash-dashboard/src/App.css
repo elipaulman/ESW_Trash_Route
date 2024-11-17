@@ -1,17 +1,17 @@
 .dashboard {
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #ffffff;
+  background-color: #fcf7f7; /* White background */
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 900px;
   margin: 40px auto;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #dcdcdc;
 }
 
 h1 {
   text-align: center;
-  color: #2c3e50;
+  color: #bb0000; /* Ohio State Scarlet */
   font-size: 2.5em;
   margin-bottom: 20px;
 }
@@ -23,21 +23,21 @@ h1 {
 .info {
   margin-top: 20px;
   text-align: center;
-  background-color: #f9f9f9;
+  background-color: #f2f2f2; /* Light gray background */
   padding: 15px;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #dcdcdc;
 }
 
 .info p {
   font-size: 1.2em;
-  color: #34495e;
+  color: #666666; /* Dark gray text */
   margin: 10px 0;
 }
 
 .info p span {
   font-weight: bold;
-  color: #e74c3c;
+  color: #bb0000; /* Ohio State Scarlet */
 }
 
 .table-container {
@@ -52,20 +52,102 @@ h1 {
 
 .data-table th,
 .data-table td {
-  border: 1px solid #ddd;
+  border: 1px solid #dcdcdc;
   padding: 12px;
   text-align: center;
 }
 
 .data-table th {
-  background-color: #f2f2f2;
+  background-color: #bb0000; /* Ohio State Scarlet */
+  color: #ffffff; /* White text */
   font-weight: bold;
 }
 
 .data-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: #f2f2f2; /* Light gray background */
 }
 
 .data-table tr:hover {
-  background-color: #ddd;
+  background-color: #dcdcdc; /* Light gray hover */
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard {
+    max-width: 800px;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  .info p {
+    font-size: 1.1em;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 992px) {
+  .dashboard {
+    max-width: 700px;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  .info p {
+    font-size: 1em;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    max-width: 600px;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+
+  .info p {
+    font-size: 0.9em;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.4em;
+  }
+
+  .info p {
+    font-size: 0.8em;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 5px;
+  }
 }

@@ -11,6 +11,9 @@ const char* PASS = "dSDfe5jvfGVV7yg5";
 // REST API Endpoint
 const char* SERVER_NAME = "https://esw-trash-route.onrender.com/api/trash-data";
 
+// Device Name
+const char* DEVICE_NAME = "TrashSensor01"; // Replace with the desired name
+
 // TFLuna Variables
 TFLI2C tflI2C;
 int16_t tfDist;  // Distance in centimeters
@@ -42,7 +45,8 @@ void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
     http.addHeader("Content-Type", "application/json");
 
     // Create JSON payload
-    String jsonPayload = "{\"distance\": " + String(distance) +
+    String jsonPayload = String("{\"name\": \"") + DEVICE_NAME +
+                         "\", \"distance\": " + String(distance) +
                          ", \"flux\": " + String(flux) +
                          ", \"temperature\": " + String(temperature) + "}";
 

@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-require('dotenv').config(); // Add this line
+require('dotenv').config();
 
 const app = express();
 const PORT = 3000;
@@ -16,6 +16,7 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 const trashSchema = new mongoose.Schema({
+  name: String,
   distance: Number,
   flux: Number,
   temperature: Number,
@@ -37,8 +38,9 @@ app.post('/api/trash-data', async (req, res) => {
 });
 
 app.get('/api/trash-data', async (req, res) => {
+  const { name } = req.query;
   try {
-    const data = await TrashData.find({});
+    const data = await TrashData.find({ name });
     res.json(data);
   } catch (error) {
     res.status(500).send('Error retrieving data');
