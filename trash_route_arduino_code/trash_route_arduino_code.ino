@@ -4,26 +4,24 @@
 #include <HTTPClient.h>
 #include <TFLI2C.h>
 
+// WiFi credentials
 const char* SSID = "Ye Olde Wifi";
-//"Registered4OSU";
+// "Registered4OSU";
 const char* PASS = "141ENorwichAve!";
-//"dSDfe5jvfGVV7yg5";
+// "dSDfe5jvfGVV7yg5";
 
 // REST API Endpoint
-const char* SERVER_NAME = "http://192.168.1.77:3000/api/trash-data";
-//"https://your-backend-server.com/api/trash-data";
+const char* SERVER_NAME = "https://esw-trash-route.onrender.com/api/trash-data";
 
 // TFLuna Variables
 TFLI2C tflI2C;
-
-// Distance in centimeters
-int16_t tfDist;
-// Signal quality/strength
-int16_t tfFlux;
-// Chip temperature in hundredths of *C
-int16_t tfTemp;
-
+int16_t tfDist;  // Distance in centimeters
+int16_t tfFlux;  // Signal quality/strength
+int16_t tfTemp;  // Chip temperature in hundredths of *C
 int16_t tfAddr = TFL_DEF_ADR; // Default TFLuna address
+
+// Sleep duration: 1 hour (in microseconds)
+#define SLEEP_DURATION_US (60ULL * 60 * 1000000)
 
 void connectWiFi() {
   WiFi.mode(WIFI_STA);
@@ -36,7 +34,7 @@ void connectWiFi() {
     Serial.print(".");
     delay(500);
   }
-  Serial.println("Connected!");
+  Serial.println(" Connected!");
 }
 
 void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
@@ -68,10 +66,9 @@ void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
 void setup() {
   Serial.begin(115200);
   Wire.begin();
-  connectWiFi();
-}
 
-void loop() {
+  connectWiFi();
+
   // Take measurement
   if (tflI2C.getData(tfDist, tfFlux, tfTemp, tfAddr)) {
     Serial.println("Measurement taken successfully!");
@@ -81,6 +78,12 @@ void loop() {
     tflI2C.printStatus();
   }
 
-  // Wait 30 seconds before taking another measurement
-  delay(30000); // 30 seconds
+  // Prepare for deep sleep
+  Serial.println("Going to sleep for 1 hour...");
+  esp_sleep_enable_timer_wakeup(SLEEP_DURATION_US);
+  esp_deep_sleep_start();
+}
+
+void loop() {
+  // Not used; ESP32 is in deep sleep between wakeups
 }
