@@ -5,10 +5,8 @@
 #include <TFLI2C.h>
 
 // WiFi credentials
-const char* SSID = "Ye Olde Wifi";
-//Registered4OSU
-const char* PASS = "141ENorwichAve!";
-//dSDfe5jvfGVV7yg5
+const char* SSID = "Registered4OSU";
+const char* PASS = "dSDfe5jvfGVV7yg5";
 
 // REST API Endpoint
 const char* SERVER_NAME = "https://esw-trash-route.onrender.com/api/trash-data";
@@ -25,7 +23,15 @@ int16_t tfAddr = TFL_DEF_ADR; // Default TFLuna address
 
 // Sleep duration: 1 hour (in microseconds)
 // 1 hour: 60ULL * 60 * 1000000
+// currently set to 1 min
 #define SLEEP_DURATION_US (60ULL * 1000000)
+
+// Function to print the reset reason
+void printResetReason() {
+  esp_reset_reason_t reset_reason = esp_reset_reason();
+  Serial.print("Reset reason: ");
+  Serial.println(reset_reason);
+}
 
 void connectWiFi() {
   WiFi.mode(WIFI_STA);
@@ -34,11 +40,19 @@ void connectWiFi() {
 
   WiFi.begin(SSID, PASS);
   Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
+  unsigned long startAttemptTime = millis();
+  
+  // Timeout after 10 seconds
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
     Serial.print(".");
-    delay(500);
+    delay(500);  // Feed the watchdog
   }
-  Serial.println(" Connected!");
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println(" Connected!");
+  } else {
+    Serial.println(" WiFi connection failed!");
+  }
 }
 
 void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
@@ -72,6 +86,9 @@ void setup() {
   Serial.begin(115200);
   Wire.begin();
 
+  // Print the reset reason for debugging
+  printResetReason();
+
   connectWiFi();
 
   // Take measurement
@@ -84,7 +101,7 @@ void setup() {
   }
 
   // Prepare for deep sleep
-  Serial.println("Going to sleep for 1 hour...");
+  Serial.println("Going to sleep for 1 minute...");
   esp_sleep_enable_timer_wakeup(SLEEP_DURATION_US);
   esp_deep_sleep_start();
 }
