@@ -6,7 +6,7 @@
 
 // WiFi credentials
 const char* SSID = "Registered4OSU";
-const char* PASS = "dSDfe5jvfGVV7yg5";
+const char* PASS = "UpcMys375nW5nFxC";
 
 // REST API Endpoint
 const char* SERVER_NAME = "https://esw-trash-route.onrender.com/api/trash-data";
