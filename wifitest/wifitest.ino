@@ -30,12 +30,12 @@ char* getStrengthDescriptor(long rssi) {
 
 void setup() {
   Serial.begin(115200);
-  connectWifi();
+  connectWiFi();
 }
 
 void loop() {
   long rssi = WiFi.RSSI();
-  Serial.print("Registered4OSU RSSI: ")
+  Serial.print("Registered4OSU RSSI: ");
   Serial.print(rssi);
   Serial.print("dBm (");
   Serial.print(getStrengthDescriptor(rssi));
