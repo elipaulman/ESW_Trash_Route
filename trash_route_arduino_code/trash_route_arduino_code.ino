@@ -25,8 +25,8 @@ const uint8_t TF_LUNA_ADDR = 0x10; // Default TFLuna address
 #define I2C_SDA 4  // Match working configuration
 #define I2C_SCL 5  // Match working configuration
 
-// Sleep duration: 8 hours (in microseconds)
-#define SLEEP_DURATION_US (8ULL * 60 * 60 * 1000000)
+// Sleep duration: 6 hours (in microseconds)
+#define SLEEP_DURATION_US (6ULL * 60 * 60 * 1000000)
 
 // Maximum measurement attempts before giving up
 #define MAX_MEASUREMENT_ATTEMPTS 5
@@ -42,7 +42,7 @@ void connectWiFi() {
   Serial.print("Connecting to WiFi");
   unsigned long startAttemptTime = millis();
   
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 100000) {
     Serial.print(".");
     delay(500);
   }
@@ -119,7 +119,7 @@ bool takeMeasurement() {
     }
   }
   
-  Serial.println("All measurement attempts failed!");
+  Serial.println(". All measurement attempts failed!");
   return false;
 }
 
