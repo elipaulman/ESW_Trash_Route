@@ -49,6 +49,8 @@ void connectWiFi() {
 
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println(" Connected!");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
   } else {
     Serial.println(" WiFi connection failed!");
   }
@@ -57,7 +59,15 @@ void connectWiFi() {
 void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
+    
+    // Begin with the server URL
     http.begin(SERVER_NAME);
+    
+    // Add these new configurations to handle HTTPS and timeouts
+    http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+    http.setInsecure(); // Skip certificate verification
+    http.setTimeout(15000); // 15 second timeout
+    
     http.addHeader("Content-Type", "application/json");
 
     String jsonPayload = String("{\"name\": \"") + DEVICE_NAME +
@@ -65,13 +75,41 @@ void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
                          ", \"flux\": " + String(flux) +
                          ", \"temperature\": " + String(temperature) + "}";
 
+    Serial.println("Sending payload: " + jsonPayload);
+    Serial.println("To server: " + String(SERVER_NAME));
+    
     int httpResponseCode = http.POST(jsonPayload);
     if (httpResponseCode > 0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
       Serial.print("Server response: ");
       Serial.println(http.getString());
     } else {
       Serial.print("Error sending data: ");
-      Serial.println(httpResponseCode);
+      Serial.print(httpResponseCode);
+      Serial.print(" - ");
+      Serial.println(http.errorToString(httpResponseCode).c_str());
+      
+      // Try an alternative approach for HTTPS connections
+      if (httpResponseCode == -11) {
+        Serial.println("Attempting alternative connection method...");
+        http.end();
+        delay(1000);
+        
+        // Try with a different endpoint format (sometimes helps with render.com)
+        http.begin(SERVER_NAME);
+        http.setInsecure();
+        http.setTimeout(20000); // Increase timeout further
+        httpResponseCode = http.POST(jsonPayload);
+        
+        if (httpResponseCode > 0) {
+          Serial.print("Second attempt succeeded! HTTP Response code: ");
+          Serial.println(httpResponseCode);
+        } else {
+          Serial.print("Second attempt also failed with error: ");
+          Serial.println(httpResponseCode);
+        }
+      }
     }
     http.end();
   } else {
@@ -119,13 +157,15 @@ bool takeMeasurement() {
     }
   }
   
-  Serial.println(". All measurement attempts failed!");
+  Serial.println("All measurement attempts failed!");
   return false;
 }
 
 void setup() {
   Serial.begin(115200);
   delay(500);  // Allow serial to initialize
+  
+  Serial.println("\n\n--- ESP32 Trash Route Monitor Starting ---");
   
   // Initialize I2C with working pin configuration
   Wire.begin(I2C_SDA, I2C_SCL);
@@ -141,13 +181,15 @@ void setup() {
   if (measurementSuccess) {
     connectWiFi();
     sendToServer(tfDist, tfFlux, tfTemp);
+  } else {
+    Serial.println("Skipping data transmission due to failed measurements");
   }
 
   // Add a delay to see debug output before sleep
-  delay(2000);
+  delay(5000); // Give more time to view debug output
 
   // Prepare for deep sleep
-  Serial.println("Going to sleep for 8 hours...");
+  Serial.println("Going to sleep for 6 hours...");
   esp_sleep_enable_timer_wakeup(SLEEP_DURATION_US);
   esp_deep_sleep_start();
 }
