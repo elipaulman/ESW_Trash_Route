@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <TFLI2C.h>
 
 // WiFi credentials
@@ -58,14 +59,17 @@ void connectWiFi() {
 
 void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
   if (WiFi.status() == WL_CONNECTED) {
+    // Create a secure WiFi client that skips certificate verification
+    WiFiClientSecure *client = new WiFiClientSecure;
+    client->setInsecure(); // Skip certificate verification
+    
     HTTPClient http;
     
-    // Begin with the server URL
-    http.begin(SERVER_NAME);
+    // Begin with the server URL, using the secure client
+    http.begin(*client, SERVER_NAME);
     
-    // Add these new configurations to handle HTTPS and timeouts
+    // Add configurations to handle redirects and timeouts
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
-    http.setInsecure(); // Skip certificate verification
     http.setTimeout(15000); // 15 second timeout
     
     http.addHeader("Content-Type", "application/json");
@@ -94,11 +98,14 @@ void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
       if (httpResponseCode == -11) {
         Serial.println("Attempting alternative connection method...");
         http.end();
+        delete client;
         delay(1000);
         
-        // Try with a different endpoint format (sometimes helps with render.com)
-        http.begin(SERVER_NAME);
-        http.setInsecure();
+        // Try with a different timeout
+        WiFiClientSecure *client2 = new WiFiClientSecure;
+        client2->setInsecure();
+        
+        http.begin(*client2, SERVER_NAME);
         http.setTimeout(20000); // Increase timeout further
         httpResponseCode = http.POST(jsonPayload);
         
@@ -109,9 +116,11 @@ void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
           Serial.print("Second attempt also failed with error: ");
           Serial.println(httpResponseCode);
         }
+        delete client2;
       }
     }
     http.end();
+    delete client;
   } else {
     Serial.println("WiFi not connected. Skipping data send.");
   }
