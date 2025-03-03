@@ -76,17 +76,19 @@ const App = () => {
   const lastFiveMeasurements = filteredData.slice(-5);
 
   // Dumpster dimensions
-  const dumpsterHeightFeet = 3.5; // Height of the dumpster in feet
-  const dumpsterHeightCm = dumpsterHeightFeet * 30.48; // Convert feet to cm
+  const dumpsterHeightFeet = 6; // Height of the dumpster in feet
+  const dumpsterWidthFeet = 5; // Width of the dumpster in feet
+  const dumpsterDiagonalFeet = Math.sqrt(dumpsterHeightFeet ** 2 + dumpsterWidthFeet ** 2); // Diagonal in feet
+  const dumpsterDiagonalCm = dumpsterDiagonalFeet * 30.48; // Convert feet to cm
   const currentDistanceCm =
     lastFiveMeasurements.length > 0
       ? lastFiveMeasurements[lastFiveMeasurements.length - 1].distance
-      : dumpsterHeightCm; // Default to full height if no data
+      : dumpsterDiagonalCm; // Default to full height if no data
 
   // Calculate fullness level
   const fullnessLevel = Math.max(
     0,
-    Math.min(100, ((1 - currentDistanceCm / dumpsterHeightCm) * 100))
+    Math.min(100, ((1 - currentDistanceCm / dumpsterDiagonalCm) * 100))
   ); // Ensure 0-100%
 
   // Convert distance to feet and inches
@@ -113,8 +115,8 @@ const App = () => {
     ),
     datasets: [
       {
-        label: 'Distance (ft)',
-        data: lastFiveMeasurements.map((entry) => entry.distance / 30.48), // Convert cm to ft
+        label: 'Fullness Level (%)',
+        data: lastFiveMeasurements.map((entry) => ((1 - entry.distance / dumpsterDiagonalCm) * 100)), // Calculate fullness level
         borderColor: '#bb0000', // Ohio State Scarlet
         backgroundColor: 'rgba(187, 0, 0, 0.2)', // Light Scarlet background
         fill: true,
@@ -128,10 +130,10 @@ const App = () => {
     scales: {
       y: {
         min: 0,
-        max: 8, // 8 feet
+        max: 100, // Fullness level percentage
         ticks: {
           callback: function(value) {
-            return `${value.toFixed(1)} ft`;
+            return `${value.toFixed(1)}%`;
           }
         }
       }
@@ -181,7 +183,7 @@ const App = () => {
                   const entryDistanceFeet = entryDistanceCm / 30.48;
                   const entryFullnessLevel = Math.max(
                     0,
-                    Math.min(100, ((1 - entryDistanceCm / dumpsterHeightCm) * 100))
+                    Math.min(100, ((1 - entryDistanceCm / dumpsterDiagonalCm) * 100))
                   );
                   return (
                     <tr key={entry.timestamp}>
