@@ -73,13 +73,19 @@ const App = () => {
       const fetchData = async () => {
         setLoading(true);
         setError(null);
+        const timeoutId = setTimeout(() => {
+          setError("Fetching data is taking longer than expected...");
+        }, 60000); // 60 seconds timeout
+
         try {
           const response = await axios.get(
             `https://esw-trash-route.onrender.com/api/trash-data?name=${selectedDumpster.value}`
           );
+          clearTimeout(timeoutId);
           console.log("Fetched data:", response.data);
           setData(response.data);
         } catch (error) {
+          clearTimeout(timeoutId);
           console.error("Error fetching data:", error);
           setError("Failed to fetch data. Please try again later.");
         }
