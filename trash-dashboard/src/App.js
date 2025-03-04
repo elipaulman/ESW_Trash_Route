@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import Select from 'react-select';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Line } from "react-chartjs-2";
+import Select from "react-select";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,8 +11,8 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import './App.css';
+} from "chart.js";
+import "./App.css";
 
 // Register the components
 ChartJS.register(
@@ -29,18 +29,30 @@ const App = () => {
   const [data, setData] = useState([]);
   const [selectedDumpster, setSelectedDumpster] = useState(null);
   const [dumpsterOptions, setDumpsterOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     // Fetch data from backend
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await axios.get('https://esw-trash-route.onrender.com/api/trash-data');
-        console.log('Fetched data:', response.data); // Log the fetched data
+        const response = await axios.get(
+          "https://esw-trash-route.onrender.com/api/trash-data"
+        );
+        console.log("Fetched data:", response.data); // Log the fetched data
         setData(response.data);
 
         // Extract unique dumpster names
-        const uniqueNames = [...new Set(response.data.map(item => item.name))];
-        const options = uniqueNames.map(name => ({ value: name, label: name }));
+        const uniqueNames = [
+          ...new Set(response.data.map((item) => item.name)),
+        ];
+        const options = uniqueNames.map((name) => ({
+          value: name,
+          label: name,
+        }));
         setDumpsterOptions(options);
 
         // Set the first dumpster as the selected one by default
@@ -48,8 +60,10 @@ const App = () => {
           setSelectedDumpster(options[0]);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
+        setError("Failed to fetch data. Please try again later.");
       }
+      setLoading(false);
     };
     fetchData();
   }, []);
@@ -57,20 +71,28 @@ const App = () => {
   useEffect(() => {
     if (selectedDumpster) {
       const fetchData = async () => {
+        setLoading(true);
+        setError(null);
         try {
-          const response = await axios.get(`https://esw-trash-route.onrender.com/api/trash-data?name=${selectedDumpster.value}`);
-          console.log('Fetched data:', response.data);
+          const response = await axios.get(
+            `https://esw-trash-route.onrender.com/api/trash-data?name=${selectedDumpster.value}`
+          );
+          console.log("Fetched data:", response.data);
           setData(response.data);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error("Error fetching data:", error);
+          setError("Failed to fetch data. Please try again later.");
         }
+        setLoading(false);
       };
       fetchData();
     }
   }, [selectedDumpster]);
 
   // Filter data for the selected dumpster
-  const filteredData = data.filter(item => item.name === selectedDumpster?.value);
+  const filteredData = data.filter(
+    (item) => item.name === selectedDumpster?.value
+  );
 
   // Get the last 3 measurements
   const lastFiveMeasurements = filteredData.slice(-5);
@@ -78,7 +100,9 @@ const App = () => {
   // Dumpster dimensions
   const dumpsterHeightFeet = 6; // Height of the dumpster in feet
   const dumpsterWidthFeet = 5; // Width of the dumpster in feet
-  const dumpsterDiagonalFeet = Math.sqrt(dumpsterHeightFeet ** 2 + dumpsterWidthFeet ** 2); // Diagonal in feet
+  const dumpsterDiagonalFeet = Math.sqrt(
+    dumpsterHeightFeet ** 2 + dumpsterWidthFeet ** 2
+  ); // Diagonal in feet
   const dumpsterDiagonalCm = dumpsterDiagonalFeet * 30.48; // Convert feet to cm
   const currentDistanceCm =
     lastFiveMeasurements.length > 0
@@ -88,7 +112,7 @@ const App = () => {
   // Calculate fullness level
   const fullnessLevel = Math.max(
     0,
-    Math.min(100, ((1 - currentDistanceCm / dumpsterDiagonalCm) * 100))
+    Math.min(100, (1 - currentDistanceCm / dumpsterDiagonalCm) * 100)
   ); // Ensure 0-100%
 
   // Convert distance to feet and inches
@@ -100,25 +124,34 @@ const App = () => {
   const currentTemperatureRaw =
     lastFiveMeasurements.length > 0
       ? lastFiveMeasurements[lastFiveMeasurements.length - 1].temperature
-      : 'N/A';
+      : "N/A";
   const currentTemperatureCelsius =
-    currentTemperatureRaw !== 'N/A' ? currentTemperatureRaw / 10 : 'N/A';
+    currentTemperatureRaw !== "N/A" ? currentTemperatureRaw / 10 : "N/A";
   const currentTemperatureFahrenheit =
-    currentTemperatureCelsius !== 'N/A'
+    currentTemperatureCelsius !== "N/A"
       ? (currentTemperatureCelsius * 9) / 5 + 32
-      : 'N/A';
+      : "N/A";
+
+  // Function to get the day of the week
+  const getDayOfWeek = (date) => {
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
+    return days[date.getDay()];
+  };
 
   // Chart data
   const chartData = {
-    labels: lastFiveMeasurements.map((entry) =>
-      new Date(entry.timestamp).toLocaleString()
-    ),
+    labels: lastFiveMeasurements.map((entry) => {
+      const date = new Date(entry.timestamp);
+      return `${date.toLocaleString()} (${getDayOfWeek(date)})`;
+    }),
     datasets: [
       {
-        label: 'Fullness Level (%)',
-        data: lastFiveMeasurements.map((entry) => ((1 - entry.distance / dumpsterDiagonalCm) * 100)), // Calculate fullness level
-        borderColor: '#bb0000', // Ohio State Scarlet
-        backgroundColor: 'rgba(187, 0, 0, 0.2)', // Light Scarlet background
+        label: "Fullness Level (%)",
+        data: lastFiveMeasurements.map(
+          (entry) => (1 - entry.distance / dumpsterDiagonalCm) * 100
+        ), // Calculate fullness level
+        borderColor: "#bb0000", // Ohio State Scarlet
+        backgroundColor: "rgba(187, 0, 0, 0.2)", // Light Scarlet background
         fill: true,
         tension: 0.4,
       },
@@ -132,25 +165,63 @@ const App = () => {
         min: 0,
         max: 100, // Fullness level percentage
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return `${value.toFixed(1)}%`;
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   };
 
   // Get the last 5 days worth of data
-  const lastFiveDaysData = filteredData.filter((entry) => {
-    const entryDate = new Date(entry.timestamp);
-    const currentDate = new Date();
-    const timeDiff = currentDate - entryDate;
-    return timeDiff <= 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
-  }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp in descending order
+  const lastFiveDaysData = filteredData
+    .filter((entry) => {
+      const entryDate = new Date(entry.timestamp);
+      const currentDate = new Date();
+      const timeDiff = currentDate - entryDate;
+      return timeDiff <= 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
+    })
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp in descending order
+
+  // Export data to CSV
+  const exportToCSV = () => {
+    const csvData = [
+      ["Time", "Fullness (%)", "Distance (ft)"],
+      ...lastFiveDaysData.map((entry) => {
+        const entryDistanceCm = entry.distance;
+        const entryDistanceFeet = entryDistanceCm / 30.48;
+        const entryFullnessLevel = Math.max(
+          0,
+          Math.min(100, (1 - entryDistanceCm / dumpsterDiagonalCm) * 100)
+        );
+        return [
+          new Date(entry.timestamp).toLocaleString(),
+          entryFullnessLevel.toFixed(2),
+          entryDistanceFeet.toFixed(2),
+        ];
+      }),
+    ];
+    const csvContent = `data:text/csv;charset=utf-8,${csvData
+      .map((e) => e.join(","))
+      .join("\n")}`;
+    const encodedUri = encodeURI(csvContent);
+    const currentDate = new Date().toISOString().split("T")[0]; // Get only the date part
+    const fileName = `${
+      selectedDumpster?.value || "dumpster"
+    }_${currentDate}.csv`;
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+  };
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard ${darkMode ? "dark-mode" : ""}`}>
       <h1>Trash Level Dashboard</h1>
+      <button onClick={() => setDarkMode(!darkMode)}>
+        {darkMode ? "Light Mode" : "Dark Mode"}
+      </button>
       <Select
         value={selectedDumpster}
         onChange={setSelectedDumpster}
@@ -158,17 +229,24 @@ const App = () => {
         className="dumpster-select"
         placeholder="Select Dumpster"
       />
-      {filteredData.length > 0 ? (
+      {loading ? (
+        <div className="spinner">Loading...</div>
+      ) : error ? (
+        <p className="error">{error}</p>
+      ) : filteredData.length > 0 ? (
         <>
           <div className="chart-container">
             <Line data={chartData} options={chartOptions} />
           </div>
           <div className="info">
             <p>Current Fullness Level: {fullnessLevel.toFixed(2)}%</p>
-            <p>Current Distance: {feet} feet {inches} inches</p>
+            <p>
+              Current Distance: {feet} feet {inches} inches
+            </p>
           </div>
           <div className="table-container">
             <h2>Last 5 Days Data</h2>
+            <button onClick={exportToCSV}>Export to CSV</button>
             <table className="data-table">
               <thead>
                 <tr>
@@ -183,11 +261,17 @@ const App = () => {
                   const entryDistanceFeet = entryDistanceCm / 30.48;
                   const entryFullnessLevel = Math.max(
                     0,
-                    Math.min(100, ((1 - entryDistanceCm / dumpsterDiagonalCm) * 100))
+                    Math.min(
+                      100,
+                      (1 - entryDistanceCm / dumpsterDiagonalCm) * 100
+                    )
                   );
                   return (
                     <tr key={entry.timestamp}>
-                      <td>{new Date(entry.timestamp).toLocaleString()}</td>
+                      <td>
+                        {new Date(entry.timestamp).toLocaleString()} (
+                        {getDayOfWeek(new Date(entry.timestamp))})
+                      </td>
                       <td>{entryFullnessLevel.toFixed(2)}</td>
                       <td>{entryDistanceFeet.toFixed(2)}</td>
                     </tr>
@@ -198,7 +282,7 @@ const App = () => {
           </div>
         </>
       ) : (
-        <p>Loading data...</p>
+        <p>No data available.</p>
       )}
     </div>
   );
