@@ -329,11 +329,6 @@ const App = () => {
             <p>
               Current Distance: {feet} feet {inches} inches
             </p>
-            {currentTemperatureCelsius !== "N/A" && (
-              <p>
-                Temperature: {currentTemperatureCelsius.toFixed(1)}°C ({currentTemperatureFahrenheit.toFixed(1)}°F)
-              </p>
-            )}
           </div>
           <div className="table-container">
             <h2>Last 5 Days Data</h2>
