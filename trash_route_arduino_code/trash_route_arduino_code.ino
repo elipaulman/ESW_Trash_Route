@@ -23,27 +23,30 @@ int16_t tfTemp;  // Chip temperature in hundredths of *C
 const uint8_t TF_LUNA_ADDR = 0x10; // Default TFLuna address
 
 // I2C Configuration (ESP32-C3 GPIO Pins)
-#define I2C_SDA 4  // Match working configuration
-#define I2C_SCL 5  // Match working configuration
+#define I2C_SDA 4
+#define I2C_SCL 5
 
 // Sleep duration: 6 hours (in microseconds)
 #define SLEEP_DURATION_US (6ULL * 60 * 60 * 1000000)
 
 // Maximum measurement attempts before giving up
-#define MAX_MEASUREMENT_ATTEMPTS 5
+#define MAX_MEASUREMENT_ATTEMPTS 3
 // Delay between measurement attempts (in milliseconds)
 #define RETRY_DELAY 1000
+
+// Static WiFi client to prevent memory fragmentation
+WiFiClientSecure client;
 
 void connectWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
-
+  
   WiFi.begin(SSID, PASS);
   Serial.print("Connecting to WiFi");
-  unsigned long startAttemptTime = millis();
   
-  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 100000) {
+  unsigned long startAttemptTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 15000) {
     Serial.print(".");
     delay(500);
   }
@@ -59,19 +62,12 @@ void connectWiFi() {
 
 void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
   if (WiFi.status() == WL_CONNECTED) {
-    // Create a secure WiFi client that skips certificate verification
-    WiFiClientSecure *client = new WiFiClientSecure;
-    client->setInsecure(); // Skip certificate verification
-    
+    client.setInsecure(); // Skip certificate verification
     HTTPClient http;
+    http.begin(client, SERVER_NAME);
     
-    // Begin with the server URL, using the secure client
-    http.begin(*client, SERVER_NAME);
-    
-    // Add configurations to handle redirects and timeouts
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
-    http.setTimeout(15000); // 15 second timeout
-    
+    http.setTimeout(10000); // 10-second timeout
     http.addHeader("Content-Type", "application/json");
 
     String jsonPayload = String("{\"name\": \"") + DEVICE_NAME +
@@ -80,47 +76,17 @@ void sendToServer(int16_t distance, int16_t flux, int16_t temperature) {
                          ", \"temperature\": " + String(temperature) + "}";
 
     Serial.println("Sending payload: " + jsonPayload);
-    Serial.println("To server: " + String(SERVER_NAME));
     
     int httpResponseCode = http.POST(jsonPayload);
     if (httpResponseCode > 0) {
       Serial.print("HTTP Response code: ");
       Serial.println(httpResponseCode);
-      Serial.print("Server response: ");
-      Serial.println(http.getString());
     } else {
       Serial.print("Error sending data: ");
-      Serial.print(httpResponseCode);
-      Serial.print(" - ");
-      Serial.println(http.errorToString(httpResponseCode).c_str());
-      
-      // Try an alternative approach for HTTPS connections
-      if (httpResponseCode == -11) {
-        Serial.println("Attempting alternative connection method...");
-        http.end();
-        delete client;
-        delay(1000);
-        
-        // Try with a different timeout
-        WiFiClientSecure *client2 = new WiFiClientSecure;
-        client2->setInsecure();
-        
-        http.begin(*client2, SERVER_NAME);
-        http.setTimeout(20000); // Increase timeout further
-        httpResponseCode = http.POST(jsonPayload);
-        
-        if (httpResponseCode > 0) {
-          Serial.print("Second attempt succeeded! HTTP Response code: ");
-          Serial.println(httpResponseCode);
-        } else {
-          Serial.print("Second attempt also failed with error: ");
-          Serial.println(httpResponseCode);
-        }
-        delete client2;
-      }
+      Serial.println(http.errorToString(httpResponseCode));
     }
+
     http.end();
-    delete client;
   } else {
     Serial.println("WiFi not connected. Skipping data send.");
   }
@@ -142,63 +108,40 @@ void scanI2C() {
 
 bool takeMeasurement() {
   for (int attempt = 1; attempt <= MAX_MEASUREMENT_ATTEMPTS; attempt++) {
-    Serial.printf("Measurement attempt %d of %d\n", attempt, MAX_MEASUREMENT_ATTEMPTS);
+    Serial.printf("Measurement attempt %d/%d\n", attempt, MAX_MEASUREMENT_ATTEMPTS);
     
     if (tflI2C.getData(tfDist, tfFlux, tfTemp, TF_LUNA_ADDR)) {
-      Serial.println("Measurement successful!");
       Serial.printf("Distance: %dcm, Flux: %d, Temp: %.2f°C\n", 
-                   tfDist, tfFlux, tfTemp/100.0);
+                   tfDist, tfFlux, tfTemp / 100.0);
       return true;
     } else {
       Serial.println("Measurement failed.");
-      tflI2C.printStatus();
-      
-      // Try resetting the I2C bus before next attempt
-      Wire.end();
-      delay(100);
-      Wire.begin(I2C_SDA, I2C_SCL);
-      delay(500);
-      
-      if (attempt < MAX_MEASUREMENT_ATTEMPTS) {
-        Serial.printf("Waiting %d ms before retrying...\n", RETRY_DELAY);
-        delay(RETRY_DELAY);
-      }
+      delay(RETRY_DELAY);
     }
   }
-  
-  Serial.println("All measurement attempts failed!");
   return false;
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(500);  // Allow serial to initialize
+  delay(500);
   
-  Serial.println("\n\n--- ESP32 Trash Route Monitor Starting ---");
-  
-  // Initialize I2C with working pin configuration
-  Wire.begin(I2C_SDA, I2C_SCL);
-  delay(500);  // Give sensor time to initialize
+  Serial.println("\n\n--- ESP32 Trash Route Monitor ---");
 
-  // Scan I2C bus to verify sensor connection
+  Wire.begin(I2C_SDA, I2C_SCL);
+  delay(500);
+  
   scanI2C();
 
-  // Take measurements with enhanced retry logic
-  bool measurementSuccess = takeMeasurement();
-
-  // Connect to WiFi and send data only if measurement was successful
-  if (measurementSuccess) {
+  if (takeMeasurement()) {
     connectWiFi();
     sendToServer(tfDist, tfFlux, tfTemp);
   } else {
     Serial.println("Skipping data transmission due to failed measurements");
   }
 
-  // Add a delay to see debug output before sleep
-  delay(5000); // Give more time to view debug output
-
-  // Prepare for deep sleep
-  Serial.println("Going to sleep for 6 hours...");
+  Serial.println("Entering deep sleep...");
+  delay(100);  // Ensure serial output finishes
   esp_sleep_enable_timer_wakeup(SLEEP_DURATION_US);
   esp_deep_sleep_start();
 }
