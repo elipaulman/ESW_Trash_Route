@@ -1,0 +1,399 @@
+/* Enhanced Dashboard CSS */
+:root {
+  --ohio-scarlet: #bb0000;
+  --ohio-gray: #666666;
+  --light-gray: #f2f2f2;
+  --border-gray: #dcdcdc;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+}
+
+/* Base body styling with transition for dark mode */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  transition: background-color var(--transition-speed) ease;
+}
+
+/* Apply dark background to body when dashboard has dark-mode class */
+body:has(.dashboard.dark-mode) {
+  background-color: #121212;
+}
+
+.dashboard {
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px var(--shadow-color);
+  max-width: 1000px;
+  margin: 40px auto;
+  border: 1px solid var(--border-gray);
+  transition: all var(--transition-speed) ease;
+}
+
+.dark-mode {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border-color: #444;
+}
+
+.dark-mode .info {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+.dark-mode .data-table th {
+  background-color: #940000;
+}
+
+.dark-mode .data-table td {
+  border-color: #444;
+}
+
+.dark-mode .data-table tr:nth-child(even) {
+  background-color: #2d2d2d;
+}
+
+.dark-mode .data-table tr:hover {
+  background-color: #3d3d3d;
+}
+
+h1, h2 {
+  text-align: center;
+  color: var(--ohio-scarlet);
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+h1 {
+  font-size: 2.8em;
+  letter-spacing: -0.5px;
+  margin-top: 10px;
+}
+
+h2 {
+  font-size: 1.8em;
+  margin-top: 40px;
+}
+
+.dark-mode h1, .dark-mode h2 {
+  color: #ff3333;
+}
+
+button {
+  background-color: var(--ohio-scarlet);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: block;
+  margin: 20px auto;
+  transition: background-color var(--transition-speed) ease;
+  box-shadow: 0 4px 6px rgba(187, 0, 0, 0.2);
+}
+
+button:hover {
+  background-color: #a00000;
+  box-shadow: 0 6px 8px rgba(187, 0, 0, 0.3);
+}
+
+.dark-mode button {
+  background-color: #940000;
+}
+
+.dark-mode button:hover {
+  background-color: #7a0000;
+}
+
+.dumpster-select {
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+/* Select component styling - improved for dark mode */
+.dumpster-select > div {
+  border-radius: 8px;
+  border-color: var(--border-gray);
+}
+
+/* Dark mode select box styling */
+.dark-mode .dumpster-select > div {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+/* Ensure select text is visible in dark mode */
+.dark-mode .dumpster-select > div > div > div {
+  color: #f0f0f0;
+}
+
+/* Fix placeholder and selected value text color in dark mode */
+.dark-mode .dumpster-select [class*="-singleValue"],
+.dark-mode .dumpster-select [class*="-placeholder"] {
+  color: #f0f0f0 !important;
+}
+
+/* Fix dropdown menu in dark mode */
+.dark-mode .dumpster-select [class*="-menu"] {
+  background-color: #2d2d2d;
+  color: #f0f0f0;
+}
+
+/* Fix dropdown menu options in dark mode */
+.dark-mode .dumpster-select [class*="-option"] {
+  background-color: #2d2d2d;
+  color: #f0f0f0;
+}
+
+/* Fix dropdown option hover in dark mode */
+.dark-mode .dumpster-select [class*="-option"]:hover,
+.dark-mode .dumpster-select [class*="-option"]:active,
+.dark-mode .dumpster-select [class*="-option"]:focus,
+.dark-mode .dumpster-select [class*="-option"].active {
+  background-color: #444;
+}
+
+/* Fix input selection text in dark mode */
+.dark-mode .dumpster-select input {
+  color: #f0f0f0 !important;
+}
+
+.chart-container {
+  margin: 40px 0;
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-gray);
+}
+
+.dark-mode .chart-container {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+.info {
+  margin: 30px auto;
+  text-align: center;
+  background-color: var(--light-gray);
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid var(--border-gray);
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-speed) ease;
+}
+
+.info p {
+  font-size: 1.3em;
+  color: var(--ohio-gray);
+  margin: 15px 0;
+  transition: color var(--transition-speed) ease;
+}
+
+.dark-mode .info p {
+  color: #e0e0e0;
+}
+
+.info p span, 
+.info p strong {
+  font-weight: bold;
+  color: var(--ohio-scarlet);
+}
+
+.dark-mode .info p span, 
+.dark-mode .info p strong {
+  color: #ff3333;
+}
+
+.table-container {
+  margin: 40px 0;
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-gray);
+  overflow: hidden;
+}
+
+.dark-mode .table-container {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid var(--border-gray);
+  padding: 14px;
+  text-align: center;
+  transition: all var(--transition-speed) ease;
+}
+
+.data-table th {
+  background-color: var(--ohio-scarlet);
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9em;
+}
+
+.data-table th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.data-table th:last-child {
+  border-top-right-radius: 8px;
+}
+
+.data-table tr:nth-child(even) {
+  background-color: var(--light-gray);
+}
+
+.data-table tr:hover {
+  background-color: rgba(187, 0, 0, 0.05);
+}
+
+.dark-mode .data-table tr:hover {
+  background-color: rgba(255, 51, 51, 0.1);
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--ohio-scarlet);
+}
+
+.dark-mode .spinner {
+  color: #ff3333;
+}
+
+.error {
+  color: var(--ohio-scarlet);
+  background-color: rgba(187, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 600px;
+  border: 1px solid rgba(187, 0, 0, 0.3);
+}
+
+.dark-mode .error {
+  background-color: rgba(255, 51, 51, 0.1);
+  border-color: rgba(255, 51, 51, 0.3);
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard {
+    max-width: 90%;
+    padding: 25px;
+  }
+
+  h1 {
+    font-size: 2.4em;
+  }
+}
+
+@media (max-width: 992px) {
+  .dashboard {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  .info p {
+    font-size: 1.2em;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    max-width: 95%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  button {
+    padding: 10px 20px;
+  }
+
+  .info {
+    padding: 20px;
+  }
+
+  .info p {
+    font-size: 1.1em;
+  }
+
+  .table-container {
+    padding: 15px;
+    overflow-x: auto;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard {
+    max-width: 100%;
+    margin: 20px 10px;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+
+  h2 {
+    font-size: 1.4em;
+  }
+
+  .info p {
+    font-size: 1em;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px;
+    font-size: 0.8em;
+  }
+  
+  .chart-container {
+    padding: 10px;
+  }
+}
+
