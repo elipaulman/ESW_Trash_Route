@@ -100,7 +100,7 @@ const App = () => {
     (item) => item.name === selectedDumpster?.value
   );
 
-  // Get the last 3 measurements
+  // Get the last 5 measurements
   const lastFiveMeasurements = filteredData.slice(-5);
 
   // Dumpster dimensions
@@ -144,6 +144,15 @@ const App = () => {
     return days[date.getDay()];
   };
 
+  // Calculate fullness level for each data point
+  const fullnessLevels = lastFiveMeasurements.map((entry) => {
+    // Calculate unclamped fullness level (can be negative)
+    const rawFullness = (1 - entry.distance / dumpsterDiagonalCm) * 100;
+    
+    // For display in the chart, clamp to 0-100%
+    return Math.max(0, Math.min(100, rawFullness));
+  });
+
   // Chart data
   const chartData = {
     labels: lastFiveMeasurements.map((entry) => {
@@ -153,30 +162,101 @@ const App = () => {
     datasets: [
       {
         label: "Fullness Level (%)",
-        data: lastFiveMeasurements.map(
-          (entry) => (1 - entry.distance / dumpsterDiagonalCm) * 100
-        ), // Calculate fullness level
+        data: fullnessLevels,
         borderColor: "#bb0000", // Ohio State Scarlet
         backgroundColor: "rgba(187, 0, 0, 0.2)", // Light Scarlet background
         fill: true,
-        tension: 0.4,
+        tension: 0, // Set to 0 for straight lines (no curve)
+        pointRadius: 6, // Increase point size for better visibility
+        pointHoverRadius: 8,
+        spanGaps: false,
+        pointBackgroundColor: "#bb0000", // All points are red
+        borderWidth: 2,
       },
     ],
   };
 
   // Chart options
   const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
     scales: {
       y: {
+        beginAtZero: true, // Start the y-axis at 0
         min: 0,
         max: 100, // Fullness level percentage
         ticks: {
+          stepSize: 20, // Create ticks at 0, 20, 40, 60, 80, 100
           callback: function (value) {
-            return `${value.toFixed(1)}%`;
+            return `${value}%`;
+          },
+        },
+        grid: {
+          drawBorder: true,
+          color: function(context) {
+            if (context.tick.value === 0) {
+              return 'rgba(0, 0, 0, 0.3)'; // Make the zero line more visible
+            }
+            return 'rgba(0, 0, 0, 0.1)';
           },
         },
       },
+      x: {
+        grid: {
+          display: true,
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+        },
+      },
     },
+    elements: {
+      point: {
+        radius: 6, // Make all points visible with consistent size
+        hitRadius: 12,
+        hoverRadius: 8,
+        borderWidth: 2,
+        backgroundColor: "#bb0000", // All points are red
+      },
+      line: {
+        tension: 0, // Ensure straight lines between points
+        borderWidth: 2,
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const index = context.dataIndex;
+            const entry = lastFiveMeasurements[index];
+            const rawFullness = (1 - entry.distance / dumpsterDiagonalCm) * 100;
+            const displayFullness = Math.max(0, rawFullness).toFixed(2);
+            const distanceFeet = (entry.distance / 30.48).toFixed(2);
+            
+            return [
+              `Fullness: ${displayFullness}%`,
+              `Distance: ${distanceFeet} ft`
+            ];
+          }
+        }
+      }
+    },
+    animation: {
+      duration: 0 // Disable animations for clearer rendering
+    },
+    layout: {
+      padding: {
+        left: 10,
+        right: 30,
+        top: 20,
+        bottom: 10
+      }
+    }
   };
 
   // Get the last 5 days worth of data
@@ -241,7 +321,7 @@ const App = () => {
         <p className="error">{error}</p>
       ) : filteredData.length > 0 ? (
         <>
-          <div className="chart-container">
+          <div className="chart-container" style={{ height: "400px" }}>
             <Line data={chartData} options={chartOptions} />
           </div>
           <div className="info">
@@ -249,6 +329,11 @@ const App = () => {
             <p>
               Current Distance: {feet} feet {inches} inches
             </p>
+            {currentTemperatureCelsius !== "N/A" && (
+              <p>
+                Temperature: {currentTemperatureCelsius.toFixed(1)}°C ({currentTemperatureFahrenheit.toFixed(1)}°F)
+              </p>
+            )}
           </div>
           <div className="table-container">
             <h2>Last 5 Days Data</h2>
@@ -278,8 +363,8 @@ const App = () => {
                         {new Date(entry.timestamp).toLocaleString()} (
                         {getDayOfWeek(new Date(entry.timestamp))})
                       </td>
-                      <td>{entryFullnessLevel.toFixed(2)}</td>
-                      <td>{entryDistanceFeet.toFixed(2)}</td>
+                      <td>{entryFullnessLevel.toFixed(2)}%</td>
+                      <td>{entryDistanceFeet.toFixed(2)} ft</td>
                     </tr>
                   );
                 })}
