@@ -42,7 +42,7 @@ const App = () => {
         const response = await axios.get(
           "https://esw-trash-route.onrender.com/api/trash-data"
         );
-        console.log("Fetched data:", response.data); // Log the fetched data
+        console.log("Fetched data:", response.data);
         setData(response.data);
 
         // Extract unique dumpster names
@@ -146,10 +146,7 @@ const App = () => {
 
   // Calculate fullness level for each data point
   const fullnessLevels = lastFiveMeasurements.map((entry) => {
-    // Calculate unclamped fullness level (can be negative)
     const rawFullness = (1 - entry.distance / dumpsterDiagonalCm) * 100;
-    
-    // For display in the chart, clamp to 0-100%
     return Math.max(0, Math.min(100, rawFullness));
   });
 
@@ -163,14 +160,14 @@ const App = () => {
       {
         label: "Fullness Level (%)",
         data: fullnessLevels,
-        borderColor: "#bb0000", // Ohio State Scarlet
-        backgroundColor: "rgba(187, 0, 0, 0.2)", // Light Scarlet background
+        borderColor: "#bb0000",
+        backgroundColor: "rgba(187, 0, 0, 0.2)",
         fill: true,
-        tension: 0, // Set to 0 for straight lines (no curve)
-        pointRadius: 6, // Increase point size for better visibility
+        tension: 0,
+        pointRadius: 6,
         pointHoverRadius: 8,
         spanGaps: false,
-        pointBackgroundColor: "#bb0000", // All points are red
+        pointBackgroundColor: "#bb0000",
         borderWidth: 2,
       },
     ],
@@ -182,11 +179,11 @@ const App = () => {
     maintainAspectRatio: false,
     scales: {
       y: {
-        beginAtZero: true, // Start the y-axis at 0
+        beginAtZero: true,
         min: 0,
-        max: 100, // Fullness level percentage
+        max: 100,
         ticks: {
-          stepSize: 20, // Create ticks at 0, 20, 40, 60, 80, 100
+          stepSize: 20,
           callback: function (value) {
             return `${value}%`;
           },
@@ -195,7 +192,7 @@ const App = () => {
           drawBorder: true,
           color: function(context) {
             if (context.tick.value === 0) {
-              return 'rgba(0, 0, 0, 0.3)'; // Make the zero line more visible
+              return 'rgba(0, 0, 0, 0.3)';
             }
             return 'rgba(0, 0, 0, 0.1)';
           },
@@ -213,14 +210,14 @@ const App = () => {
     },
     elements: {
       point: {
-        radius: 6, // Make all points visible with consistent size
+        radius: 6,
         hitRadius: 12,
         hoverRadius: 8,
         borderWidth: 2,
-        backgroundColor: "#bb0000", // All points are red
+        backgroundColor: "#bb0000",
       },
       line: {
-        tension: 0, // Ensure straight lines between points
+        tension: 0,
         borderWidth: 2,
       },
     },
@@ -247,7 +244,7 @@ const App = () => {
       }
     },
     animation: {
-      duration: 0 // Disable animations for clearer rendering
+      duration: 0
     },
     layout: {
       padding: {
@@ -259,21 +256,21 @@ const App = () => {
     }
   };
 
-  // Get the last 5 days worth of data
-  const lastFiveDaysData = filteredData
+  // Get the last week's worth of data
+  const lastWeekData = filteredData
     .filter((entry) => {
       const entryDate = new Date(entry.timestamp);
       const currentDate = new Date();
       const timeDiff = currentDate - entryDate;
-      return timeDiff <= 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
+      return timeDiff <= 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
     })
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp in descending order
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   // Export data to CSV
   const exportToCSV = () => {
     const csvData = [
       ["Time", "Fullness (%)", "Distance (ft)"],
-      ...lastFiveDaysData.map((entry) => {
+      ...lastWeekData.map((entry) => {
         const entryDistanceCm = entry.distance;
         const entryDistanceFeet = entryDistanceCm / 30.48;
         const entryFullnessLevel = Math.max(
@@ -291,7 +288,7 @@ const App = () => {
       .map((e) => e.join(","))
       .join("\n")}`;
     const encodedUri = encodeURI(csvContent);
-    const currentDate = new Date().toISOString().split("T")[0]; // Get only the date part
+    const currentDate = new Date().toISOString().split("T")[0];
     const fileName = `${
       selectedDumpster?.value || "dumpster"
     }_${currentDate}.csv`;
@@ -331,7 +328,7 @@ const App = () => {
             </p>
           </div>
           <div className="table-container">
-            <h2>Last 5 Days Data</h2>
+            <h2>Last Week's Data</h2>
             <button onClick={exportToCSV}>Export to CSV</button>
             <table className="data-table">
               <thead>
@@ -342,7 +339,7 @@ const App = () => {
                 </tr>
               </thead>
               <tbody>
-                {lastFiveDaysData.map((entry) => {
+                {lastWeekData.map((entry) => {
                   const entryDistanceCm = entry.distance;
                   const entryDistanceFeet = entryDistanceCm / 30.48;
                   const entryFullnessLevel = Math.max(
